@@ -1,0 +1,96 @@
+# suicides_india
+Analyzing the suicides in india based on age, gender, causes, location, etc. 
+
+select * from suicides_india
+
+--DATA EXPLORATION
+-- Get total number of records
+SELECT COUNT(*) AS total_suicides FROM suicides_india sii ;
+
+-- Get sample of records
+SELECT * FROM suicides_india sii 
+LIMIT 10;
+
+--DATA ANALYSIS
+-- Total number of suicides in each state in descending order
+SELECT state, COUNT(*) as suicides_state
+FROM suicides_india sii 
+GROUP BY state
+ORDER BY suicides_state DESC;
+
+
+-- Suicides by gender and age group
+SELECT gender, age_group, COUNT(*) as suicides_gender_age
+FROM suicides_india sii 
+GROUP BY gender, age_group
+order by suicides_gender_age desc;
+
+
+-- Count the number of suicides per year
+SELECT "Year", COUNT(*) as suicides_per_year
+FROM suicides_india sii 
+GROUP BY "Year" 
+ORDER BY "Year";
+
+-- Find the average number of suicides per year
+SELECT AVG(suicides_per_year) as average_per_year
+FROM (
+    SELECT "Year" , COUNT(*) as suicides_per_year
+    FROM suicides_india sii 
+    GROUP BY "Year"
+) subquery;
+
+--Total number of suicides grouped by the cause and reasoning for death in descending order
+SELECT "Type", type_code, COUNT(*) as cause_of_suicides
+FROM suicides_india sii 
+GROUP BY "Type", type_code
+order by cause_of_suicides desc;
+
+-- Add a temporary column to store converted gender values to integers
+ALTER TABLE suicides_india 
+ADD COLUMN gender_temp INTEGER;
+
+-- Convert "gender" column from VARCHAR to INTEGER
+UPDATE suicides_india 
+SET gender_temp = CASE gender
+                WHEN 'Male' THEN 1
+                WHEN 'Female' THEN 2
+             END;
+-- Get rid of the original "gender" column
+ALTER TABLE suicides_india 
+DROP COLUMN gender;
+
+-- Rename temporary column to "gender"
+ALTER TABLE suicides_india 
+RENAME COLUMN gender_temp TO gender;
+SELECT * FROM suicides_india si;
+
+-- Add a temp column to store the new integer gender values
+ALTER TABLE suicides_india 
+ADD COLUMN age_temp INTEGER;
+
+-- Convert the "age_group" column from VARCHAR to INTEGER
+UPDATE suicides_india 
+SET age_temp = CASE age_group
+                WHEN '0-14' THEN 10
+                WHEN '15-29' THEN 20
+                when '30-44' then 30
+                when '45-59' then 50
+                when '60+' then 60
+             END;
+-- Get rid of the original "age_group" column
+ALTER TABLE suicides_india 
+DROP COLUMN age_group;
+
+-- Rename temporary column to "age_group"
+ALTER TABLE suicides_india 
+RENAME COLUMN age_temp TO age_group;
+SELECT * FROM suicides_india si;
+
+--Find correlation between age and gender
+select corr(gender, age_group)
+from suicides_india si;
+
+
+
+
